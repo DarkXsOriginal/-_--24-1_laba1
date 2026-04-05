@@ -11,15 +11,15 @@ private:
 public:
     Shader();
     ~Shader();
-
+    
     bool loadFromFile(const std::string& vertexPath, const std::string& fragmentPath);
     Shader& use();
     void unuse();
     GLuint getID();
-
     Shader& set(const std::string& name, int value);
     Shader& set(const std::string& name, float value);
     Shader& set(const std::string& name, const float* values, int count);
+    Shader& setMat4(const std::string& name, const float* matrix);
 };
 
 #endif

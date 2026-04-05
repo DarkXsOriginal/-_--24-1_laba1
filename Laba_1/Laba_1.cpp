@@ -4,7 +4,28 @@
 #include <iostream>
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+#include "glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "Shader.h"
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void processInput(GLFWwindow* window);
+
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 768;
+
+glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float yaw = -90.0f;
+float pitch = 0.0f;
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+float fov = 45.0f;
 
 float vertex[] = {
     -0.5f, -0.5f,
@@ -13,8 +34,46 @@ float vertex[] = {
     -0.5f,  0.5f
 };
 
-int main()
-{
+void processInput(GLFWwindow* window) {
+    float cameraSpeed = 0.05f;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPosition += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPosition -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = (xpos - lastX) * 0.1f;
+    float yoffset = (lastY - ypos) * 0.1f;
+    lastX = xpos;
+    lastY = ypos;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+}
+
+int main() {
     if (!glfwInit()) {
         fprintf(stderr, "ERROR: could not start GLFW3.\n");
         return 1;
@@ -25,10 +84,8 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
     GLFWwindow* MyWindow;
-    MyWindow = glfwCreateWindow(512, 512, "MyWindow", NULL, NULL);
+    MyWindow = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "MyWindow", NULL, NULL);
 
     if (!MyWindow) {
         glfwTerminate();
@@ -36,6 +93,8 @@ int main()
     }
 
     glfwMakeContextCurrent(MyWindow);
+    glfwSetCursorPosCallback(MyWindow, mouse_callback);
+    glfwSetInputMode(MyWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -43,17 +102,6 @@ int main()
         fprintf(stderr, "ERROR: could not initialize GLEW: %s\n", glewGetErrorString(err));
         return -3;
     }
-
-    const GLubyte* version_str = glGetString(GL_VERSION);
-    const GLubyte* device_str = glGetString(GL_RENDERER);
-
-    printf("OpenGL version: %s\n", version_str);
-    printf("OpenGL device: %s\n", device_str);
-
-    int major, minor;
-    glGetIntegerv(GL_MAJOR_VERSION, &major);
-    glGetIntegerv(GL_MINOR_VERSION, &minor);
-    printf("Context version: %d.%d\n", major, minor);
 
     GLuint vbo, vao;
     glGenVertexArrays(1, &vao);
@@ -75,6 +123,19 @@ int main()
     }
 
     while (!glfwWindowShouldClose(MyWindow)) {
+        processInput(MyWindow);
+
+        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
+
+        glm::mat4 transform = glm::mat4(1.0f);
+        glm::mat4 model = glm::mat4(1.0f);
+
+        shaderProgram.use().setMat4("model", glm::value_ptr(model));
+        shaderProgram.use().setMat4("view", glm::value_ptr(view));
+        shaderProgram.use().setMat4("projection", glm::value_ptr(projection));
+        shaderProgram.use().setMat4("transform", glm::value_ptr(transform));
+
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.2f, 1.0f, 1.0f, 1.0f);
 
@@ -95,3 +156,4 @@ int main()
     glfwTerminate();
     return 0;
 }
+

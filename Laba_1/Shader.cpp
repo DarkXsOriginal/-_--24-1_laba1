@@ -2,6 +2,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 Shader::Shader() : programID(0) {}
 
@@ -10,7 +12,10 @@ Shader::~Shader() {
         glDeleteProgram(programID);
     }
 }
-
+Shader& Shader::setMat4(const std::string& name, const float* matrix) {
+    glUniformMatrix4fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, matrix);
+    return *this;
+}
 std::string loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {

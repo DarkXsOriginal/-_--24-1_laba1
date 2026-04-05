@@ -140,7 +140,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glew-2.1.0\src\glew.c" />
-    <ClCompile Include="Laba_1.cpp" />
+    <ClCompile Include="Laba_1.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)C:\Users\test\Documents\ЗыряновЛевДмитриевич_АСУб-24-1\Laba_1\glad\include;$(SolutionDir)C:\Users\test\Documents\ЗыряновЛевДмитриевич_АСУб-24-1\Laba_1\glfw-3.4.bin.WIN64\include\glm;C:\Users\test\Documents\ЗыряновЛевДмитриевич_АСУб-24-1\Laba_1\glfw-3.4.bin.WIN64\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
