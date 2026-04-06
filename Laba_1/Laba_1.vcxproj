@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Laba_1\glew-2.1.0\include;$(SolutionDir)Laba_1\glfw-3.4.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Laba_1\glew-2.1.0\include;$(SolutionDir)Laba_1\glfw-3.4.bin.WIN64\include;$(SolutionDir)Laba_1\glad\include;$(SolutionDir)Laba_1\glfw-3.4.bin.WIN64\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
